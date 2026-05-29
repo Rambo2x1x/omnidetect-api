@@ -1,0 +1,169 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OmniDetect API",
+    "description": "An enterprise-grade, high-performance, stateless API combining linguistic perplexity AI content detection, active-voice/rhythm bypass humanization, and search index plagiarism validation.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://omnidetect-api.onrender.com",
+      "description": "Production Render Server"
+    },
+    {
+      "url": "http://localhost:5001",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/v1/detect": {
+      "post": {
+        "summary": "AI Content Detection",
+        "description": "Analyzes text character layout and sentence length standard deviation to calculate probability signatures of AI-generated content.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Text body content to check (up to 50,000 characters)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Linguistic Heuristics AI probability score results.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "aiProbability": 87,
+                  "label": "AI",
+                  "metrics": {
+                    "wordCount": 128,
+                    "sentenceCount": 8,
+                    "lexicalDiversity": 0.54,
+                    "burstiness": 1.25,
+                    "predictabilityScore": 82.4,
+                    "aiKeywordDensity": 0.08
+                  },
+                  "sentences": [
+                    {
+                      "text": "Furthermore, it is important to remember that tapestries of technology foster synergy.",
+                      "wordCount": 12,
+                      "aiScore": 95
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/humanize": {
+      "post": {
+        "summary": "AI Bypass Humanizer",
+        "description": "Rewrites predictable transitions, randomizes sentence rhythm layouts, and inserts conversational active voice verbs to bypass AI probability scans.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "AI-generated text content to rewrite (up to 10,000 characters)."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["standard", "creative"],
+                    "default": "standard",
+                    "description": "Rewriting strength and syntax mutation density."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Humanized rewritten text and verification score.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "originalText": "Furthermore, it is important to remember that tapestries of technology foster synergy.",
+                  "humanizedText": "Also, keep in mind that complex collections of technology build teamwork.",
+                  "originalScore": 87,
+                  "newScore": 8,
+                  "wordCount": 11
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/check/plagiarism": {
+      "post": {
+        "summary": "Plagiarism Checker",
+        "description": "Queries web index registries to compare sentence overlap percentages and flag duplicate copy.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Text to analyze for plagiarism matches."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Web index similarity validation details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "plagiarismPercent": 20,
+                  "uniquePercent": 80,
+                  "matches": [
+                    {
+                      "matchedText": "Cat is a small domesticated carnivorous mammal.",
+                      "sourceUrl": "https://en.wikipedia.org/wiki/Cat",
+                      "sourceTitle": "Cat - Wikipedia",
+                      "similarity": 95.5
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
