@@ -3,7 +3,7 @@
   "info": {
     "title": "OmniDetect API",
     "description": "An enterprise-grade, high-performance, stateless API combining linguistic perplexity AI content detection, active-voice/rhythm bypass humanization, and search index plagiarism validation.",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "servers": [
     {
@@ -19,7 +19,7 @@
     "/v1/detect": {
       "post": {
         "summary": "AI Content Detection",
-        "description": "Analyzes text character layout and sentence length standard deviation to calculate probability signatures of AI-generated content.",
+        "description": "Analyzes text character layout, Shannon word entropy, lexical richness indices, N-gram patterns, and sentence length standard deviation to calculate probability signatures of AI-generated content. Supports optional LLM-assisted style co-scans.",
         "requestBody": {
           "required": true,
           "content": {
@@ -31,6 +31,11 @@
                   "text": {
                     "type": "string",
                     "description": "Text body content to check (up to 50,000 characters)."
+                  },
+                  "hybrid": {
+                    "type": "boolean",
+                    "description": "If true, combines statistical heuristics with deep learning styling analysis (requires server GEMINI_API_KEY / OPENAI_API_KEY).",
+                    "default": false
                   }
                 }
               }
@@ -48,21 +53,35 @@
                 "example": {
                   "aiProbability": 87,
                   "label": "AI",
+                  "language": "en",
+                  "classifiers": {
+                    "gptProbability": 45,
+                    "claudeProbability": 25,
+                    "geminiProbability": 12,
+                    "llamaProbability": 5
+                  },
                   "metrics": {
                     "wordCount": 128,
                     "sentenceCount": 8,
                     "lexicalDiversity": 0.54,
+                    "giraudIndex": 6.11,
+                    "herdanIndex": 0.88,
+                    "entropy": 5.12,
                     "burstiness": 1.25,
                     "predictabilityScore": 82.4,
-                    "aiKeywordDensity": 0.08
+                    "aiKeywordDensity": 0.08,
+                    "bigramRepetitionRatio": 0.95,
+                    "trigramRepetitionRatio": 0.98
                   },
                   "sentences": [
                     {
                       "text": "Furthermore, it is important to remember that tapestries of technology foster synergy.",
                       "wordCount": 12,
-                      "aiScore": 95
+                      "aiScore": 95,
+                      "highlightRisk": "high"
                     }
-                  ]
+                  ],
+                  "hybridScanPerformed": false
                 }
               }
             }
@@ -73,7 +92,7 @@
     "/v1/humanize": {
       "post": {
         "summary": "AI Bypass Humanizer",
-        "description": "Rewrites predictable transitions, randomizes sentence rhythm layouts, and inserts conversational active voice verbs to bypass AI probability scans.",
+        "description": "Rewrites predictable transitions, randomizes sentence rhythm layouts, and inserts conversational contractions to bypass AI probability scans. Supports programmatic rewriting and high-fidelity LLM-assisted rephrasing.",
         "requestBody": {
           "required": true,
           "content": {
@@ -88,9 +107,19 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["standard", "creative"],
+                    "enum": ["standard", "creative", "academic", "premium"],
                     "default": "standard",
-                    "description": "Rewriting strength and syntax mutation density."
+                    "description": "Rewriting strength and syntax mutation density. Premium mode utilizes LLM-based rephrasing."
+                  },
+                  "readability": {
+                    "type": "string",
+                    "enum": ["elementary", "high_school", "college", "professional"],
+                    "description": "Target readability grade level (Premium mode only)."
+                  },
+                  "tone": {
+                    "type": "string",
+                    "enum": ["casual", "academic", "creative", "technical"],
+                    "description": "Target tone of voice style (Premium mode only)."
                   }
                 }
               }
@@ -110,7 +139,18 @@
                   "humanizedText": "Also, keep in mind that complex collections of technology build teamwork.",
                   "originalScore": 87,
                   "newScore": 8,
-                  "wordCount": 11
+                  "wordCount": 11,
+                  "readability": {
+                    "before": {
+                      "readingEase": 45.5,
+                      "gradeLevel": "High School"
+                    },
+                    "after": {
+                      "readingEase": 75.2,
+                      "gradeLevel": "Middle School"
+                    }
+                  },
+                  "humanizeMethod": "programmatic"
                 }
               }
             }
@@ -121,7 +161,7 @@
     "/v1/check/plagiarism": {
       "post": {
         "summary": "Plagiarism Checker",
-        "description": "Queries web index registries to compare sentence overlap percentages and flag duplicate copy.",
+        "description": "Queries web index registries and Wikipedia fact databases to compare sentence overlap percentages and flag duplicate copy. Employs blended Levenshtein-distance and Jaccard token metrics.",
         "requestBody": {
           "required": true,
           "content": {
@@ -155,7 +195,9 @@
                       "matchedText": "Cat is a small domesticated carnivorous mammal.",
                       "sourceUrl": "https://en.wikipedia.org/wiki/Cat",
                       "sourceTitle": "Cat - Wikipedia",
-                      "similarity": 95.5
+                      "similarity": 95.5,
+                      "startIndex": 0,
+                      "endIndex": 46
                     }
                   ]
                 }

@@ -58,7 +58,8 @@ app.get('/v1/endpoints', (req: Request, res: Response) => {
             description: 'Computes AI content probability percentages, word/sentence lengths, perplexity, and sentence-by-sentence analysis.',
             parameters: {
               body: {
-                text: { type: 'string', required: true, description: 'Direct text content to scan' }
+                text: { type: 'string', required: true, description: 'Direct text content to scan' },
+                hybrid: { type: 'boolean', required: false, description: 'Toggle LLM stylistic co-scan (requires GEMINI_API_KEY / OPENAI_API_KEY)', default: false }
               }
             }
           }
@@ -71,11 +72,13 @@ app.get('/v1/endpoints', (req: Request, res: Response) => {
           {
             path: '/v1/humanize',
             method: 'POST',
-            description: 'Transforms text vocabulary transitions and sentence burstiness structure to drop AI scores to < 10%.',
+            description: 'Transforms text vocabulary transitions and sentence burstiness structure to drop AI scores.',
             parameters: {
               body: {
                 text: { type: 'string', required: true, description: 'AI text to bypass' },
-                mode: { type: 'string', required: false, enum: ['standard', 'creative'], default: 'standard' }
+                mode: { type: 'string', required: false, enum: ['standard', 'creative', 'academic', 'premium'], default: 'standard' },
+                readability: { type: 'string', required: false, enum: ['elementary', 'high_school', 'college', 'professional'], description: 'Target readability grade level (Premium mode only)' },
+                tone: { type: 'string', required: false, enum: ['casual', 'academic', 'creative', 'technical'], description: 'Target tone of voice (Premium mode only)' }
               }
             }
           }
@@ -88,7 +91,7 @@ app.get('/v1/endpoints', (req: Request, res: Response) => {
           {
             path: '/v1/check/plagiarism',
             method: 'POST',
-            description: 'Compares text sentence snippets against live search engine results to calculate Levenshtein distance duplicate matches.',
+            description: 'Compares text sentence snippets against live search engine results and Wikipedia fact indices to calculate combined duplicate matches.',
             parameters: {
               body: {
                 text: { type: 'string', required: true, description: 'Text to scan for plagiarism' }
@@ -102,15 +105,15 @@ app.get('/v1/endpoints', (req: Request, res: Response) => {
 });
 
 // 4. Endpoint: POST /v1/detect (AI Content Detection)
-app.post('/v1/detect', requireRapidApiSecret, enforceTierLimits, (req: Request, res: Response) => {
-  const { text } = req.body;
+app.post('/v1/detect', requireRapidApiSecret, enforceTierLimits, async (req: Request, res: Response) => {
+  const { text, hybrid } = req.body;
   if (!text) {
     res.status(400).json({ error: 'Bad Request', message: 'Parameter "text" is required in request body.' });
     return;
   }
 
   try {
-    const result = analyzeText(text);
+    const result = await analyzeText(text, { hybrid: !!hybrid });
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: 'Internal Server Error', message: err.message });
@@ -118,15 +121,15 @@ app.post('/v1/detect', requireRapidApiSecret, enforceTierLimits, (req: Request, 
 });
 
 // 5. Endpoint: POST /v1/humanize (AI Bypass / Humanizer)
-app.post('/v1/humanize', requireRapidApiSecret, enforceTierLimits, (req: Request, res: Response) => {
-  const { text, mode } = req.body;
+app.post('/v1/humanize', requireRapidApiSecret, enforceTierLimits, async (req: Request, res: Response) => {
+  const { text, mode, readability, tone, language } = req.body;
   if (!text) {
     res.status(400).json({ error: 'Bad Request', message: 'Parameter "text" is required in request body.' });
     return;
   }
 
   try {
-    const result = humanize(text, mode);
+    const result = await humanize(text, mode, { readability, tone, language });
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: 'Internal Server Error', message: err.message });
